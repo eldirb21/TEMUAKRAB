@@ -3,26 +3,49 @@ import {
   StyleSheet,
   ImageBackground,
   TouchableOpacity,
+  ActivityIndicator,
 } from 'react-native';
 import React from 'react';
 import AText from './a-text';
 
-export default function AcardReason({companyName, companyNumber, children}) {
+export default function AcardReason({
+  companyName,
+  companyNumber,
+  loading,
+  children,
+  table,
+}) {
   return (
     <ImageBackground
       resizeMode="cover"
       style={styles.container}
       source={require('../assets/bg.png')}>
       {children}
-
-      {companyName && (
-        <View style={styles.context}>
-          <AText style={styles.name}>{companyName}</AText>
-          <View style={styles.content}>
-            <AText style={styles.label}>No Bangku</AText>
-            <AText style={styles.number}>{companyNumber}</AText>
+      {loading ? (
+        <ActivityIndicator size={'large'} color="#FFF" />
+      ) : (
+        companyName && (
+          <View style={styles.context}>
+            <AText style={styles.name}>{companyName}</AText>
+            <View style={{flexDirection: 'row'}}>
+              {companyNumber && (
+                <View style={styles.content}>
+                  <AText style={styles.label}>No Pax</AText>
+                  <AText style={styles.number}>{companyNumber}</AText>
+                </View>
+              )}
+              {table != null && companyNumber != null && (
+                <View style={{marginHorizontal: 20}} />
+              )}
+              {table && (
+                <View style={styles.content}>
+                  <AText style={styles.label}>No Table</AText>
+                  <AText style={styles.number}>{table}</AText>
+                </View>
+              )}
+            </View>
           </View>
-        </View>
+        )
       )}
     </ImageBackground>
   );
@@ -51,6 +74,8 @@ const styles = StyleSheet.create({
   label: {
     color: '#000',
     fontSize: 16,
+    fontWeight: '600',
+    textTransform: 'uppercase',
   },
   number: {
     fontWeight: '600',

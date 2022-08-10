@@ -46,10 +46,11 @@ export default function Scann() {
   const [Inputan, setInputan] = useState('');
   const [canDetectBarcode, setcanDetectBarcode] = useState(false);
   const [flash, setflash] = useState('off');
-  const [autoFocus, setautoFocus] = useState('on');
+  const [autoFocus, setautoFocus] = useState(RNCamera.Constants.AutoFocus.on); //('on');
   const [textBlocks, settextBlocks] = useState([]);
   const [barcods, setbarcodes] = useState([]);
   const [data, setdata] = useState({});
+  const [loading, setloading] = useState(false);
   const [autoFocusPoint, setautoFocusPoint] = useState({
     normalized: {x: 0.5, y: 0.5},
     drawRectPosition: {
@@ -65,17 +66,26 @@ export default function Scann() {
     return () => clearTimeout(delay);
   }, [canDetectBarcode]);
 
-  const loadbyId = () => {
-    console.log('press');
-    scannService
-      .loadId(Inputan)
-      .then(res => {
-        // console.log('res = ', res.data);
-        setdata(res.data);
-      })
-      .catch(err => {
-        // console.log('err = ', err);
-      });
+  const loadbyId = barcodes => {
+    var brcd = '';
+    if (barcodes.length != 0) {
+      brcd = barcodes.map(x => x.data).toString();
+    }
+    if (brcd != '') {
+      setloading(true);
+      scannService
+        .loadId(brcd)
+        .then(res => {
+          setTimeout(() => setloading(false), 1000);
+          setdata(res.data);
+          if (res.data == '') {
+            ToastAndroid.show('Data tidak ditemukan!', ToastAndroid.SHORT);
+          }
+        })
+        .catch(err => {
+          setloading(false);
+        });
+    }
   };
 
   function toggleFlash() {
@@ -103,7 +113,6 @@ export default function Scann() {
   }
 
   const barcodeRecognized = ({barcodes}) => {
-    // console.log('press');
     if (barcodes.length != 0) {
       var x = barcods.map(x => x.data);
       var y = barcodes.map(x => x.data);
@@ -111,15 +120,15 @@ export default function Scann() {
         ToastAndroid.showWithGravity(
           'Scann barcode already exists!',
           ToastAndroid.LONG,
-          ToastAndroid.CENTER,
+          ToastAndroid.BOTTOM,
           25,
           50,
         );
-        console.log(Object.keys(data).length == 0);
-        Object.keys(data).length == 0 && loadbyId();
+        setbarcodes(barcodes);
+        loadbyId(barcodes);
       } else {
         setbarcodes(barcodes);
-        loadbyId();
+        loadbyId(barcodes);
       }
     }
     setcanDetectBarcode(!canDetectBarcode);
@@ -132,10 +141,17 @@ export default function Scann() {
     <React.Fragment key={data + bounds.origin.x}>
       <View
         style={[
-          styles.text,
+          styles.Fragment,
           {...bounds.size, left: bounds.origin.x, top: bounds.origin.y},
         ]}>
-        <AText style={[styles.textBlock]}>{data}</AText>
+        <View style={styles.ItemFragment}>
+          <View style={[styles.equels, styles.top, styles.left]} />
+          <View style={[styles.equels, styles.bottom, styles.left]} />
+        </View>
+        <View style={styles.ItemFragment}>
+          <View style={[styles.equels, styles.top, styles.right]} />
+          <View style={[styles.equels, styles.bottom, styles.right]} />
+        </View>
       </View>
     </React.Fragment>
   );
@@ -171,7 +187,14 @@ export default function Scann() {
         </Acameras>
       </View>
 
-      <AcardReason companyName={data.name} companyNumber={data.pax}>
+      <AcardReason
+        companyName={data.name}
+        companyNumber={data.pax}
+        table={data.tableNumbers}
+        loading={loading}
+        // companyNumber={null}
+        // table={null}
+      >
         <AtextInput
           showSoftInputOnFocus={false}
           onPress={() => setShowList(true)}
@@ -195,17 +218,36 @@ const styles = StyleSheet.create({
     paddingTop: 10,
     backgroundColor: '#000',
   },
-  text: {
-    padding: 10,
-    borderWidth: 2,
-    borderRadius: 2,
+  Fragment: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     position: 'absolute',
-    borderColor: '#FFF',
-    justifyContent: 'center',
   },
-  textBlock: {
-    color: '#FFF',
-    textAlign: 'center',
-    backgroundColor: 'transparent',
+  ItemFragment: {
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+  },
+  equels: {
+    borderRadius: 5,
+    alignSelf: 'center',
+    height: 20,
+    width: 20,
+  },
+  bottom: {
+    borderBottomColor: '#D2D2D2',
+    borderBottomWidth: 2,
+  },
+  top: {
+    borderTopColor: '#D2D2D2',
+    borderTopWidth: 2,
+  },
+  right: {
+    borderRightColor: '#D2D2D2',
+    borderRightWidth: 2,
+  },
+  left: {
+    borderLeftColor: '#D2D2D2',
+    borderLeftWidth: 2,
   },
 });

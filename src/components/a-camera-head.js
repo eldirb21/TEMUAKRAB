@@ -75,8 +75,8 @@ const styles = StyleSheet.create({
     height: 150,
     width: 150,
     borderRadius: 12,
-    borderWidth: 2,
-    borderColor: 'white',
+    // borderWidth: 2,
+    // borderColor: 'white',
     opacity: 0.4,
   },
   flipText: {

@@ -4,7 +4,7 @@ import Aicon from './a-icon';
 import AText from './a-text';
 
 export default function AtextInput(props) {
-  const {onPress, margin, width} = props;
+  const {onPress, margin, width, textColor} = props;
   return (
     <View
       style={[
@@ -14,17 +14,27 @@ export default function AtextInput(props) {
       ]}>
       <TextInput
         {...props}
-        style={style.input}
-        placeholderTextColor="grey"
+        style={[
+          style.input,
+          {
+            color: textColor ? textColor : '#000',
+            borderColor: textColor ? textColor : 'grey',
+          },
+        ]}
+        placeholderTextColor={textColor ? textColor : 'grey'}
         placeholder="Search"
-				// onChange={}
-				// onFocus={}
-				// onEndEditing={}
-				// onTextInput={}
-			
+        // onChange={}
+        // onFocus={}
+        // onEndEditing={}
+        // onTextInput={}
       />
       <TouchableOpacity style={style.icon} onPress={onPress}>
-        <Aicon type="Octicons" name="search" size={20} color="grey" />
+        <Aicon
+          type="Octicons"
+          name="search"
+          size={20}
+          color={textColor ? textColor : 'grey'}
+        />
       </TouchableOpacity>
     </View>
   );
@@ -40,9 +50,8 @@ const style = StyleSheet.create({
   input: {
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: 'grey',
+
     paddingHorizontal: 20,
-    color: '#000',
   },
   icon: {
     position: 'absolute',

@@ -1,27 +1,21 @@
-import Api from './api';
+import {URL} from '@env';
+import axios from 'axios';
 
 const scannService = {
   loadName(params) {
     return new Promise((resolve, reject) => {
-      Api.getbyName(params, response => {
-        if (response.status == 200) {
-          resolve(response);
-        } else {
-          reject(response);
-        }
-      });
+      axios
+        .post(URL + `GetByName?Name=${params}`)
+        .then(res => resolve(res))
+        .catch(err => reject(err));
     });
   },
   loadId(params) {
     return new Promise((resolve, reject) => {
-      Api.getbyId(params, response => {
-				console.log(response.data);
-        if (response.status == 200) {
-          resolve(response);
-        } else {
-          reject(response);
-        }
-      });
+      axios
+        .post(URL + `GetById?Id=${params}`)
+        .then(res => resolve(res))
+        .catch(err => reject(err));
     });
   },
 };

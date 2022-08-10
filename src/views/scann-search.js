@@ -6,6 +6,8 @@ import {
   ActivityIndicator,
   StyleSheet,
   ToastAndroid,
+  ImageBackground,
+  Dimensions,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import Aicon from '../components/a-icon';
@@ -13,13 +15,11 @@ import AtextInput from '../components/a-textInput';
 import scannService from '../services/scannServices';
 import AText from '../components/a-text';
 
+const {height, width} = Dimensions.get('window');
 export default function ScannSearch(props) {
   const {visible, onClose, onData} = props;
   const [Input, setInput] = useState('');
-  const [data, setdata] = useState({
-    name: 'PT.SAMPLE ABCD',
-    pax: 24,
-  });
+  const [data, setdata] = useState({});
   const [loading, setloading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -35,12 +35,15 @@ export default function ScannSearch(props) {
     scannService
       .loadName(Input)
       .then(res => {
+				// console.log(res);
         setTimeout(() => {
           setdata(res.data);
           setloading(false);
+					if(res.data=='')ToastAndroid.show("Data tidak ditemukan!",ToastAndroid.SHORT)
         }, 2000);
       })
       .catch(err => {
+        // console.log('err', err);
         setTimeout(() => {
           setloading(false);
         }, 2000);
@@ -67,43 +70,52 @@ export default function ScannSearch(props) {
       visible={visible}>
       <TouchableOpacity onPress={onClose} style={styles.overley} />
       <View style={styles.container}>
-        <View style={styles.bg}>
-          <TouchableOpacity
-            onPress={onClose}
-            activeOpacity={0.7}
-            style={styles.close}>
-            <Aicon name="arrow-back-ios" size={20} color="#000" />
-          </TouchableOpacity>
-          <View style={{flex: 1}}>
-            <AtextInput
-              onPress={onPressLoad}
-              value={Input}
-              onChangeText={val => setInput(val)}
-              margin={0.1}
-              {...props}
-            />
+        <ImageBackground
+          style={{
+            flex: 1,
+            height: height,
+            width: width,
+          }}
+          source={require('../assets/bg.png')}>
+          <View style={styles.bg}>
+            <TouchableOpacity
+              onPress={onClose}
+              activeOpacity={0.7}
+              style={styles.close}>
+              <Aicon name="arrow-back-ios" size={20} color="#FFF" />
+            </TouchableOpacity>
+            <View style={{flex: 1}}>
+              <AtextInput
+                textColor="#FFF"
+                onPress={onPressLoad}
+                value={Input}
+                onChangeText={val => setInput(val)}
+                margin={0.1}
+                {...props}
+              />
+            </View>
           </View>
-        </View>
-        {loading ? (
-          <View style={{marginTop: 20}}>
-            <ActivityIndicator size={'large'} />
-          </View>
-        ) : Object.keys(data).length != 0 ? (
-          <TouchableOpacity
-            activeOpacity={0.4}
-            style={styles.item}
-            onPress={() => {
-              onData(data);
-              onClose();
-            }}>
-            <AText style={styles.name}>{data.name}</AText>
-            <AText style={{fontSize: 18}}>{data.pax}</AText>
-          </TouchableOpacity>
-        ) : (
-          <View style={styles.emptycontent}>
-            <AText style={styles.textEmpty}>Search User Data</AText>
-          </View>
-        )}
+          {loading ? (
+            <View style={{marginTop: 20}}>
+              <ActivityIndicator size={'large'} />
+            </View>
+          ) : Object.keys(data).length != 0 ? (
+            <TouchableOpacity
+              activeOpacity={0.4}
+              style={styles.item}
+              onPress={() => {
+                onData(data);
+                onClose();
+              }}>
+              <AText style={styles.name}>{data.name}</AText>
+              <AText style={{fontSize: 18, color: '#FFF'}}>{data.pax}</AText>
+            </TouchableOpacity>
+          ) : (
+            <View style={styles.emptycontent}>
+              <AText style={styles.textEmpty}>Search User Data</AText>
+            </View>
+          )}
+        </ImageBackground>
       </View>
     </Modal>
   );
@@ -124,7 +136,7 @@ const styles = StyleSheet.create({
   bg: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFF',
+    backgroundColor: 'rgba(0,0,0,0.2)',
     paddingVertical: 5,
     paddingHorizontal: 10,
     borderBottomWidth: 1,
@@ -140,9 +152,10 @@ const styles = StyleSheet.create({
   item: {
     padding: 14,
     borderWidth: 0.5,
-    borderRadius: 10,
+    borderRadius: 20,
     marginVertical: 10,
     borderColor: 'grey',
+    backgroundColor: 'green',
     marginHorizontal: 10,
     flexDirection: 'row',
     paddingHorizontal: 20,
@@ -151,6 +164,7 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 18,
     textTransform: 'uppercase',
+    color: '#FFF',
   },
   emptycontent: {
     alignItems: 'center',
