@@ -10,6 +10,13 @@ const Acameras = React.forwardRef((props, ref) => {
       ratio={'16:9'}
       whiteBalance={'auto'}
       focusDepth={0}
+      // barCodeTypes
+      autoFocus={'on'}
+      // exposure
+      // notAuthorizedView
+      focusable
+      defaultTouchToFocus
+      mirrorImage={false}
       androidCameraPermissionOptions={{
         title: 'Permission to use camera',
         message: 'We need your permission to use your camera',

@@ -21,6 +21,7 @@ import AcameraHead from '../components/a-camera-head';
 import ScannSearch from './scann-search';
 import scannService from '../services/scannServices';
 import AText from '../components/a-text';
+import AmodalInput from '../components/a-modal-input';
 
 const flashModeOrder = {
   off: 'on',
@@ -42,6 +43,7 @@ const landmarkSize = 2;
 
 export default function Scann() {
   const camera = createRef();
+  const [ShowForm, setShowForm] = useState(false);
   const [ShowList, setShowList] = useState(false);
   const [Inputan, setInputan] = useState('');
   const [canDetectBarcode, setcanDetectBarcode] = useState(false);
@@ -60,9 +62,7 @@ export default function Scann() {
   });
 
   useEffect(() => {
-    const delay = setTimeout(() => {
-      setcanDetectBarcode(true);
-    }, 2500);
+    const delay = setTimeout(() => setcanDetectBarcode(true), 2500);
     return () => clearTimeout(delay);
   }, [canDetectBarcode]);
 
@@ -78,6 +78,7 @@ export default function Scann() {
         .then(res => {
           setTimeout(() => setloading(false), 1000);
           setdata(res.data);
+          setShowForm(true);
           if (res.data == '') {
             ToastAndroid.show('Data tidak ditemukan!', ToastAndroid.SHORT);
           }
@@ -187,26 +188,30 @@ export default function Scann() {
         </Acameras>
       </View>
 
-      <AcardReason
-        companyName={data.name}
-        companyNumber={data.pax}
-        table={data.tableNumbers}
-        loading={loading}
-        // companyNumber={null}
-        // table={null}
-      >
+      <AcardReason data={data} loading={loading}>
         <AtextInput
+          containerStyle={{textTransform: 'capitalize'}}
           showSoftInputOnFocus={false}
           onPress={() => setShowList(true)}
           onTouchStart={val => setShowList(true)}
-          value={Inputan}
+          value={data.name}
         />
       </AcardReason>
-
       <ScannSearch
-        onClose={() => setShowList(!ShowList)}
+        onClose={() => {
+          setShowList(!ShowList);
+          setShowForm(true);
+        }}
         onData={data => setdata(data)}
+        onChanges={data}
         visible={ShowList}
+      />
+
+      <AmodalInput
+        Items={data}
+        onChange={val => setdata(val)}
+        visible={ShowForm && Object.keys(data).length != 0}
+        onHidden={() => setShowForm(!ShowForm)}
       />
     </View>
   );

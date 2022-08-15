@@ -8,59 +8,78 @@ import {
   ToastAndroid,
   ImageBackground,
   Dimensions,
+  FlatList,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import Aicon from '../components/a-icon';
 import AtextInput from '../components/a-textInput';
 import scannService from '../services/scannServices';
 import AText from '../components/a-text';
+import ASpinner from '../components/a-spinner';
 
 const {height, width} = Dimensions.get('window');
 export default function ScannSearch(props) {
-  const {visible, onClose, onData} = props;
+  const {visible, onClose, onData, onChanges} = props;
   const [Input, setInput] = useState('');
-  const [data, setdata] = useState({});
+  const [data, setdata] = useState([]);
   const [loading, setloading] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [loadingSearch, setloadingSearch] = useState(false);
+  const [refresh, setrefresh] = useState(false);
+  const [itemSelect, setitemSelect] = useState({});
 
   useEffect(() => {
+    loadSearchKeywoard();
+  }, [visible]);
+  useEffect(() => {
+    setitemSelect(onChanges);
+  }, [onChanges]);
+  useEffect(() => {
     const delay = setTimeout(() => {
-      if (Input != '') load();
+      reload();
     }, 1000);
     return () => clearTimeout(delay);
   }, [Input]);
-
-  const load = () => {
-    setloading(true);
-    scannService
-      .loadName(Input)
-      .then(res => {
-				// console.log(res);
-        setTimeout(() => {
-          setdata(res.data);
-          setloading(false);
-					if(res.data=='')ToastAndroid.show("Data tidak ditemukan!",ToastAndroid.SHORT)
-        }, 2000);
-      })
-      .catch(err => {
-        // console.log('err', err);
-        setTimeout(() => {
-          setloading(false);
-        }, 2000);
-      });
+  const reload = () => {
+    setloadingSearch(true);
+    loadSearchKeywoard();
   };
 
-  const onPressLoad = () => {
-    if (Input != '') {
-      onClose();
-      load();
+  const loadSearchKeywoard = () => {
+    setloading(true);
+    scannService
+      .searchKeyword(Input)
+      .then(res => {
+        setrefresh(false);
+        setloading(false);
+        setloadingSearch(false);
+        setdata(res.data);
+      })
+      .catch(err => {
+        setloading(false);
+        setrefresh(false);
+        setloadingSearch(false);
+      });
+  };
+  const onSearchUser = value => {
+    setInput(value);
+  };
+
+  const onPressLoad = value => {
+    if (value != '') {
+      setloadingSearch(true);
+      const delay = setTimeout(() => reload(), 1000);
+      return () => clearTimeout(delay);
     } else {
       ToastAndroid.showWithGravity(
-        'Please, Input User Name!',
+        'Please, Enter User Search!',
         ToastAndroid.LONG,
         ToastAndroid.CENTER,
       );
     }
+  };
+  const onrefresh = () => {
+    setrefresh(true);
+    loadSearchKeywoard();
   };
   return (
     <Modal
@@ -87,34 +106,78 @@ export default function ScannSearch(props) {
             <View style={{flex: 1}}>
               <AtextInput
                 textColor="#FFF"
-                onPress={onPressLoad}
+                onPress={() => onPressLoad(Input)}
                 value={Input}
-                onChangeText={val => setInput(val)}
+                onChangeText={val => onSearchUser(val)}
                 margin={0.1}
                 {...props}
               />
             </View>
           </View>
-          {loading ? (
-            <View style={{marginTop: 20}}>
-              <ActivityIndicator size={'large'} />
-            </View>
-          ) : Object.keys(data).length != 0 ? (
-            <TouchableOpacity
-              activeOpacity={0.4}
-              style={styles.item}
-              onPress={() => {
-                onData(data);
-                onClose();
-              }}>
-              <AText style={styles.name}>{data.name}</AText>
-              <AText style={{fontSize: 18, color: '#FFF'}}>{data.pax}</AText>
-            </TouchableOpacity>
-          ) : (
-            <View style={styles.emptycontent}>
-              <AText style={styles.textEmpty}>Search User Data</AText>
-            </View>
-          )}
+          <FlatList
+            data={data}
+            showsVerticalScrollIndicator={false}
+            keyExtractor={(item, index) => index.toString()}
+            ItemSeparatorComponent={() => (
+              <View style={{borderBottomWidth: 1, borderColor: 'grey'}} />
+            )}
+            onRefresh={onrefresh}
+            refreshing={refresh}
+            ListEmptyComponent={() =>
+              !loading &&
+              !loadingSearch && (
+                <View
+                  style={{
+                    flex: 1,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                  }}>
+                  <Text>No data Search</Text>
+                </View>
+              )
+            }
+            ListHeaderComponent={() => {
+              if (!loadingSearch) return null;
+              return (
+                <View
+                  style={{
+                    height: 40,
+                    width: '100%',
+                    backgroundColor: '#00B8D4',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                  }}>
+                  <ActivityIndicator size={'small'} color="#FFF" />
+                </View>
+              );
+            }}
+            renderItem={({item, index}) => {
+              return (
+                <TouchableOpacity
+                  activeOpacity={0.4}
+                  style={[
+                    styles.item,
+                    itemSelect.id == item.id && {
+                      backgroundColor: 'green',
+                    },
+                  ]}
+                  onPress={() => {
+                    setitemSelect(item);
+                    onData(item);
+                    onClose();
+                  }}>
+                  <AText style={styles.name}>{item.name}</AText>
+                  <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                    <AText style={{color: '#FFF'}}>Pax : </AText>
+                    <Text
+                      style={{minWidth: 25, textAlign: 'right', color: '#FFF'}}>
+                      {item.pax}
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              );
+            }}
+          />
         </ImageBackground>
       </View>
     </Modal>
@@ -150,20 +213,14 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
   },
   item: {
-    padding: 14,
-    borderWidth: 0.5,
-    borderRadius: 20,
-    marginVertical: 10,
-    borderColor: 'grey',
-    backgroundColor: 'green',
-    marginHorizontal: 10,
     flexDirection: 'row',
-    paddingHorizontal: 20,
     justifyContent: 'space-between',
+    paddingHorizontal: 10,
+    paddingVertical: 10,
   },
   name: {
     fontSize: 18,
-    textTransform: 'uppercase',
+    textTransform: 'capitalize',
     color: '#FFF',
   },
   emptycontent: {
