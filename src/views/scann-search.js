@@ -21,28 +21,59 @@ const {height, width} = Dimensions.get('window');
 export default function ScannSearch(props) {
   const {visible, onClose, onData, onChanges} = props;
   const [Input, setInput] = useState('');
-  const [data, setdata] = useState([]);
+  const [data, setdata] = useState([
+    {
+      name: 'Jhon due',
+      pax: 10,
+      tableNumbers: 5,
+      attendedPax: 3,
+    },
+    {
+      name: 'alex',
+      pax: 6,
+      tableNumbers: 5,
+      attendedPax: 3,
+    },
+    {
+      name: 'michael',
+      pax: 6,
+      tableNumbers: 5,
+      attendedPax: 3,
+    },
+    {
+      name: 'william',
+      pax: 6,
+      tableNumbers: 5,
+      attendedPax: 3,
+    },
+    {
+      name: 'simon',
+      pax: 6,
+      tableNumbers: 5,
+      attendedPax: 3,
+    },
+  ]);
   const [loading, setloading] = useState(false);
   const [loadingSearch, setloadingSearch] = useState(false);
   const [refresh, setrefresh] = useState(false);
   const [itemSelect, setitemSelect] = useState({});
 
-  useEffect(() => {
-    loadSearchKeywoard();
-  }, [visible]);
-  useEffect(() => {
-    setitemSelect(onChanges);
-  }, [onChanges]);
-  useEffect(() => {
-    const delay = setTimeout(() => {
-      reload();
-    }, 1000);
-    return () => clearTimeout(delay);
-  }, [Input]);
-  const reload = () => {
-    setloadingSearch(true);
-    loadSearchKeywoard();
-  };
+  // useEffect(() => {
+  //   loadSearchKeywoard();
+  // }, [visible]);
+  // useEffect(() => {
+  //   setitemSelect(onChanges);
+  // }, [onChanges]);
+  // useEffect(() => {
+  //   const delay = setTimeout(() => {
+  //     reload();
+  //   }, 1000);
+  //   return () => clearTimeout(delay);
+  // }, [Input]);
+  // const reload = () => {
+  //   setloadingSearch(true);
+  //   loadSearchKeywoard();
+  // };
 
   const loadSearchKeywoard = () => {
     setloading(true);
@@ -95,7 +126,8 @@ export default function ScannSearch(props) {
             height: height,
             width: width,
           }}
-          source={require('../assets/bg.png')}>
+          // source={require('../assets/bg.png')}
+        >
           <View style={styles.bg}>
             <TouchableOpacity
               onPress={onClose}
@@ -118,9 +150,9 @@ export default function ScannSearch(props) {
             data={data}
             showsVerticalScrollIndicator={false}
             keyExtractor={(item, index) => index.toString()}
-            ItemSeparatorComponent={() => (
-              <View style={{borderBottomWidth: 1, borderColor: 'grey'}} />
-            )}
+            // ItemSeparatorComponent={() => (
+            //   <View style={{borderBottomWidth: 1, borderColor: 'grey'}} />
+            // )}
             onRefresh={onrefresh}
             refreshing={refresh}
             ListEmptyComponent={() =>
@@ -154,11 +186,12 @@ export default function ScannSearch(props) {
             renderItem={({item, index}) => {
               return (
                 <TouchableOpacity
+                  key={index}
                   activeOpacity={0.4}
                   style={[
                     styles.item,
-                    itemSelect.id == item.id && {
-                      backgroundColor: 'green',
+                    itemSelect.id === item.id && {
+                      backgroundColor: '#FFF',
                     },
                   ]}
                   onPress={() => {
@@ -166,11 +199,20 @@ export default function ScannSearch(props) {
                     onData(item);
                     onClose();
                   }}>
-                  <AText style={styles.name}>{item.name}</AText>
+                  <View>
+                    <AText style={styles.name}>{item.name}</AText>
+                    <AText
+                      style={{
+                        fontSize: 14,
+                        color: '#000',
+                      }}>
+                      {'Table = ' + item.tableNumbers}
+                    </AText>
+                  </View>
                   <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                    <AText style={{color: '#FFF'}}>Pax : </AText>
+                    <AText style={{color: '#000'}}>Pax : </AText>
                     <Text
-                      style={{minWidth: 25, textAlign: 'right', color: '#FFF'}}>
+                      style={{minWidth: 25, textAlign: 'right', color: '#000'}}>
                       {item.pax}
                     </Text>
                   </View>
@@ -215,8 +257,10 @@ const styles = StyleSheet.create({
   item: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingHorizontal: 10,
-    paddingVertical: 10,
+    padding: 20,
+    marginVertical: 2,
+    marginHorizontal: 15,
+    borderRadius: 10,
   },
   name: {
     fontSize: 18,

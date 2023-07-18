@@ -51,7 +51,12 @@ export default function Scann() {
   const [autoFocus, setautoFocus] = useState(RNCamera.Constants.AutoFocus.on); //('on');
   const [textBlocks, settextBlocks] = useState([]);
   const [barcods, setbarcodes] = useState([]);
-  const [data, setdata] = useState({});
+  const [data, setdata] = useState({
+    name: 'Jhon due',
+    pax: 10,
+    tableNumbers: 5,
+    attendedPax: 3,
+  });
   const [loading, setloading] = useState(false);
   const [autoFocusPoint, setautoFocusPoint] = useState({
     normalized: {x: 0.5, y: 0.5},

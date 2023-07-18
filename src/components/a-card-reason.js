@@ -12,12 +12,12 @@ import ASpinner from './a-spinner';
 
 export default function AcardReason({loading, children, data}) {
   const [datas, setdatas] = useState(data);
-	const [loadingsubmit, setloadingsubmit] = useState(true)
+  const [loadingsubmit, setloadingsubmit] = useState(true);
   useEffect(() => {
     getCallback();
   }, []);
   const getCallback = () => {
-		setloadingsubmit(true)
+    setloadingsubmit(true);
     scannService
       .loadId(data.id)
       .then(res => {
@@ -35,7 +35,8 @@ export default function AcardReason({loading, children, data}) {
     <ImageBackground
       resizeMode="cover"
       style={styles.container}
-      source={require('../assets/bg.png')}>
+      // source={require('../assets/bg.png')}
+    >
       {children}
       {loading ? (
         <View
@@ -53,7 +54,6 @@ export default function AcardReason({loading, children, data}) {
               textAlign: 'center',
               marginBottom: 20,
             }}>
-            Andaru {'\n'}
             Temu Akrab
           </AText>
           <ActivityIndicator size={'large'} color="#FFF" />
@@ -97,15 +97,14 @@ export default function AcardReason({loading, children, data}) {
             style={{
               fontSize: 20,
               textTransform: 'uppercase',
-              color: 'hsl(0, 0%, 90%)',
+              color: '#1e81b0',
               textAlign: 'center',
             }}>
-            Andaru {'\n'}
             Temu Akrab
           </AText>
         </View>
       )}
-			<ASpinner visible={loadingsubmit}/>
+      <ASpinner visible={loadingsubmit} />
     </ImageBackground>
   );
 }
